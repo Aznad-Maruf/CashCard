@@ -1,13 +1,15 @@
 package example.cashcard;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriBuilder;
-import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -33,15 +35,27 @@ public class CashCardController {
 
     }
 
+    @GetMapping
+    public ResponseEntity<List<CashCard>> findAll(Pageable pageable) {
+        Page<CashCard> cashCards = cashCardRepository.findAll(
+                PageRequest.of(pageable.getPageNumber(),
+                        pageable.getPageSize(),
+                        pageable.getSortOr(Sort.by(Sort.Direction.ASC, "amount")))
+        );
+
+        return ResponseEntity.ok(cashCards.getContent());
+    }
+
     @PostMapping
-    public ResponseEntity<Void> createCashCard(@RequestBody CashCard newCashCardRequest,
-                                               UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<Void> createCashCard(@RequestBody CashCard newCashCardRequest) {
+
         CashCard createdCashCard = cashCardRepository.save(newCashCardRequest);
 
-        System.out.println(new Date());
+        URI locationOfCreatedCashCard = UriComponentsBuilder
+                .fromPath("/cashcards/{id}")
+                .buildAndExpand(createdCashCard.id())
+                .toUri();
 
-//        URI uri = uriBuilder.
-
-        return ResponseEntity.created(URI.create("/cashcards/" + createdCashCard.id())).build();
+        return ResponseEntity.created(locationOfCreatedCashCard).build();
     }
 }
