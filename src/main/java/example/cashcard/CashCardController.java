@@ -1,5 +1,6 @@
 package example.cashcard;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,11 +21,12 @@ import java.util.Optional;
 @RequestMapping("/cashcards")
 public class CashCardController {
 
-    private final CashCardRepository cashCardRepository;
+    @Autowired
+    private CashCardRepository cashCardRepository;
 
-    public CashCardController(CashCardRepository cashCardRepository) {
-        this.cashCardRepository = cashCardRepository;
-    }
+//    public CashCardController(CashCardRepository cashCardRepository) {
+//        this.cashCardRepository = cashCardRepository;
+//    }
 
     @GetMapping("/{requestedId}")
     public ResponseEntity<CashCard> findById(@PathVariable Long requestedId) {
@@ -53,7 +55,7 @@ public class CashCardController {
 
         URI locationOfCreatedCashCard = UriComponentsBuilder
                 .fromPath("/cashcards/{id}")
-                .buildAndExpand(createdCashCard.id())
+                .buildAndExpand(createdCashCard.getId())
                 .toUri();
 
         return ResponseEntity.created(locationOfCreatedCashCard).build();
